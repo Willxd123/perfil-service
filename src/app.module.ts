@@ -1,12 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ModuloModule } from './modulo/modulo.module';
-import { AulaModule } from './aula/aula.module';
-import { GrupoModule } from './grupo/grupo.module';
-import { HorarioModule } from './horario/horario.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { DocenteModule } from './docente/docente.module';
+import { EstudianteModule } from './estudiante/estudiante.module';
+import { GrupoEstudianteModule } from './grupo-estudiante/grupo-estudiante.module';
 
 @Module({
   imports: [
@@ -46,12 +43,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       }),
       inject: [ConfigService],
     }),
-    ModuloModule,
-    AulaModule,
-    GrupoModule,
-    HorarioModule,
+    DocenteModule,
+    GrupoEstudianteModule,
+    EstudianteModule
+
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

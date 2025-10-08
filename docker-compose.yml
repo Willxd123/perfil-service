@@ -5,9 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: grupos-service
+    container_name: Perfil-service
     ports:
-      - "${PORT:-3001}:3001"
+      - "${PORT:-3002}:3002"
     environment:
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PORT=${DATABASE_PORT}
@@ -15,7 +15,7 @@ services:
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_SSL=${DATABASE_SSL}
-      - PORT=3001
+      - PORT=3002
     restart: unless-stopped
     networks:
       - app-network
