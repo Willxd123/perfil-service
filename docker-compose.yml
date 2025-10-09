@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  grupos-service:
+  perfil-service:
     build:
       context: .
       dockerfile: Dockerfile
