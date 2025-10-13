@@ -1,3 +1,4 @@
+import { firstValueFrom } from 'rxjs';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -43,11 +44,17 @@ export class GrupoEstudianteService {
   
   private async validarGrupo(grupo_id: number): Promise<boolean> {
     try {
-      await this.httpService
-        .get(`http://localhost:3001/api/grupo/${grupo_id}`)
-        .toPromise();
+      const url = `http://grupos-service:3001/api/grupo/${grupo_id}`;
+      console.log('🔍 Validando grupo:', url);
+      
+      const response = await firstValueFrom(
+        this.httpService.get(url)
+      );
+      
+      console.log('✅ Grupo encontrado:', response.data);
       return true;
-    } catch {
+    } catch (error) {
+      console.error('❌ Error validando grupo:', error.message);
       return false;
     }
   }
