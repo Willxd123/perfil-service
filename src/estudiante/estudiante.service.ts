@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Estudiante } from './entities/estudiante.entity';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class EstudianteService {
@@ -41,24 +42,31 @@ export class EstudianteService {
     return this.estudianteRepository.save(estudiante);
   }
   
-  async update(id: number, data: Partial<CreateEstudianteDto>) {
+  async update(id: number, updateEstudianteDto: Partial<CreateEstudianteDto>) {
+    const estudiante = await this.estudianteRepository.findOneBy({ id });
+    if (!estudiante) throw new NotFoundException(`Estudiante con id ${id} no encontrado`);
+
     // Validar que el plan de estudio existe si se está actualizando el plan_estudio_id
-    if (data.plan_estudio_id) {
-      const planEstudioExiste = await this.validarPlanEstudio(data.plan_estudio_id);
+    if (updateEstudianteDto.plan_estudio_id) {
+      const planEstudioExiste = await this.validarPlanEstudio(updateEstudianteDto.plan_estudio_id);
       if (!planEstudioExiste) {
         throw new NotFoundException('Plan de estudio no encontrado');
       }
     }
-  
-    // Actualizar el estudiante
-    await this.estudianteRepository.update(id, data);
+
+    // Encriptar la codigo si se está actualizando
+    if (updateEstudianteDto.codigo) {
+      updateEstudianteDto.codigo = await bcrypt.hash(updateEstudianteDto.codigo, 10);
+    }
+
+    await this.estudianteRepository.update(id, updateEstudianteDto);
     return this.findOne(id);
   }
   
   private async validarPlanEstudio(plan_estudio_id: number): Promise<boolean> {
     try {
       await this.httpService
-        .get(`http://localhost:3003/api/plan-estudio/${plan_estudio_id}`)
+        .get(`http://academia-service:3003/api/plan-estudio/${plan_estudio_id}`)
         .toPromise();
       return true;
     } catch {
@@ -69,5 +77,12 @@ export class EstudianteService {
   async remove(id: number) {
     const estudiante = await this.findOne(id);
     return this.estudianteRepository.remove(estudiante);
+  }
+
+  findByRegistroWithPassword(registro: string) {
+    return this.estudianteRepository.findOne({
+      where: { registro },
+      select: ['id', 'nombre', 'email', 'registro', 'codigo', 'telefono', 'plan_estudio_id'],
+    });
   }
 }

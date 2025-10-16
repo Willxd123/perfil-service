@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { AuthGuard } from './../auth/guard/auth.guard';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { EstudianteService } from './estudiante.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 
 @ApiTags('Estudiantes')
 @Controller('estudiantes')
+@UseGuards(AuthGuard)
+@ApiBearerAuth()
 export class EstudianteController {
   constructor(private readonly estudianteService: EstudianteService) {}
 

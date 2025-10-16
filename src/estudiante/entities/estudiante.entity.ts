@@ -8,6 +8,9 @@ export class Estudiante {
   @Column({ unique: true })
   registro: string;
 
+  @Column({ nullable: true })
+  codigo: string;
+
   @Column()
   nombre: string;
 
@@ -16,9 +19,6 @@ export class Estudiante {
 
   @Column({ nullable: true })
   telefono: string;
-
-  @Column({ nullable: true })
-  user_id: number; // referencia a users en servicio madre
 
   @Column()
   plan_estudio_id: number; // referencia a plan de estudio

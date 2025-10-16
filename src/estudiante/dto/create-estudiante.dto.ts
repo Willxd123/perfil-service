@@ -11,6 +11,15 @@ export class CreateEstudianteDto {
   @IsString()
   registro: string;
 
+  @ApiPropertyOptional({
+    description: 'Código del estudiante',
+    example: '12345',
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  codigo?: string;
+  
   @ApiProperty({
     description: 'Nombre completo del estudiante',
     example: 'Juan Pérez García',
@@ -43,9 +52,7 @@ export class CreateEstudianteDto {
     example: 1,
     type: Number,
   })
-  @IsOptional()
-  @IsNumber()
-  user_id?: number;
+
 
   @ApiProperty({
     description: 'ID del plan de estudio',
