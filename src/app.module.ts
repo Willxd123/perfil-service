@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DocenteModule } from './docente/docente.module';
 import { EstudianteModule } from './estudiante/estudiante.module';
 import { GrupoEstudianteModule } from './grupo-estudiante/grupo-estudiante.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -45,7 +46,8 @@ import { GrupoEstudianteModule } from './grupo-estudiante/grupo-estudiante.modul
     }),
     DocenteModule,
     GrupoEstudianteModule,
-    EstudianteModule
+    EstudianteModule,
+    AuthModule
 
   ],
 })
