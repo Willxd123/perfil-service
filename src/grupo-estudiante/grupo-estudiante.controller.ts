@@ -52,4 +52,12 @@ export class GrupoEstudianteController {
   remove(@Param('id') id: number) {
     return this.grupoEstudianteService.remove(id);
   }
+  @Get('estudiante/:estudianteId')
+  @ApiOperation({ summary: 'Obtener historial académico de un estudiante' })
+  @ApiParam({ name: 'estudianteId', type: Number, example: 1 })
+  @ApiResponse({ status: 200, description: 'Historial académico del estudiante' })
+  @ApiResponse({ status: 404, description: 'Estudiante no encontrado' })
+  findByEstudiante(@Param('estudianteId') estudianteId: string) {
+    return this.grupoEstudianteService.findByEstudiante(+estudianteId);
+  }
 }

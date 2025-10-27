@@ -4,9 +4,11 @@ import { GrupoEstudianteController } from './grupo-estudiante.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GrupoEstudiante } from './entities/grupo-estudiante.entity';
 import { HttpModule } from '@nestjs/axios';
+import { Gestion } from './entities/gestion.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([GrupoEstudiante]), HttpModule],
+  
+  imports: [HttpModule,TypeOrmModule.forFeature([GrupoEstudiante, Gestion]), HttpModule],
   controllers: [GrupoEstudianteController],
   providers: [GrupoEstudianteService],
 })

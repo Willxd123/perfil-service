@@ -13,6 +13,7 @@ services:
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_SSL=${DATABASE_SSL}
+      - JWT_SECRET=${JWT_SECRET}
       - PORT=3002
     restart: unless-stopped
     networks:
