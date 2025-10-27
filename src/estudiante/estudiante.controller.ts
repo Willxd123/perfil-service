@@ -1,13 +1,28 @@
 import { AuthGuard } from './../auth/guard/auth.guard';
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { EstudianteService } from './estudiante.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 
 @ApiTags('Estudiantes')
 @Controller('estudiantes')
-@UseGuards(AuthGuard)
-@ApiBearerAuth()
 export class EstudianteController {
   constructor(private readonly estudianteService: EstudianteService) {}
 
@@ -42,7 +57,10 @@ export class EstudianteController {
   @ApiParam({ name: 'id', type: Number, example: 1 })
   @ApiBody({ type: CreateEstudianteDto })
   @ApiResponse({ status: 200, description: 'Estudiante actualizado' })
-  @ApiResponse({ status: 404, description: 'Estudiante o plan de estudio no encontrado' })
+  @ApiResponse({
+    status: 404,
+    description: 'Estudiante o plan de estudio no encontrado',
+  })
   update(@Param('id') id: number, @Body() dto: CreateEstudianteDto) {
     return this.estudianteService.update(id, dto);
   }
@@ -50,9 +68,41 @@ export class EstudianteController {
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar estudiante' })
   @ApiParam({ name: 'id', type: Number, example: 1 })
-  @ApiResponse({ status: 200, description: 'Estudiante eliminado exitosamente' })
+  @ApiResponse({
+    status: 200,
+    description: 'Estudiante eliminado exitosamente',
+  })
   @ApiResponse({ status: 404, description: 'Estudiante no encontrado' })
   remove(@Param('id') id: number) {
     return this.estudianteService.remove(id);
+  }
+
+  // src/estudiante/estudiante.controller.ts
+
+  @Get(':id/materias-disponibles')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Obtener materias disponibles para cursar de un estudiante específico',
+  })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    example: 1,
+    description: 'ID del estudiante',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de materias que el estudiante puede cursar',
+  })
+  @ApiResponse({ status: 404, description: 'Estudiante no encontrado' })
+  async getMateriasDisponibles(@Param('id') id: string) {
+    // --- CAMBIO PRINCIPAL ---
+    // 1. Obtener la respuesta completa del servicio
+    const respuestaCompleta =
+      await this.estudianteService.getMateriasDisponibles(+id);
+
+    // 2. Devolver SOLAMENTE el arreglo, que es lo que el frontend espera
+    return respuestaCompleta.materias_disponibles;
   }
 }
