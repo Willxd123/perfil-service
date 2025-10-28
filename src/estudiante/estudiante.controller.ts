@@ -82,8 +82,7 @@ export class EstudianteController {
   @Get(':id/materias-disponibles')
   @ApiBearerAuth()
   @ApiOperation({
-    summary:
-      'Obtener materias disponibles para cursar de un estudiante específico',
+    summary: 'Obtener materias no inscritas por el estudiante',
   })
   @ApiParam({
     name: 'id',
@@ -93,16 +92,10 @@ export class EstudianteController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Lista de materias que el estudiante puede cursar',
+    description: 'Lista de materias que el estudiante no ha inscrito',
   })
   @ApiResponse({ status: 404, description: 'Estudiante no encontrado' })
   async getMateriasDisponibles(@Param('id') id: string) {
-    // --- CAMBIO PRINCIPAL ---
-    // 1. Obtener la respuesta completa del servicio
-    const respuestaCompleta =
-      await this.estudianteService.getMateriasDisponibles(+id);
-
-    // 2. Devolver SOLAMENTE el arreglo, que es lo que el frontend espera
-    return respuestaCompleta.materias_disponibles;
+    return this.estudianteService.getMateriasDisponibles(+id);
   }
 }
