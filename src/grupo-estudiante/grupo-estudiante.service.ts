@@ -122,7 +122,7 @@ export class GrupoEstudianteService {
   private async getGrupoDetails(grupo_id: number): Promise<any | null> {
     try {
       // Corregido: localhost, no loc
-      const url = `http://localhost:3001/api/grupo/${grupo_id}`; 
+      const url = `http://laravel.inscripciones/api/grupos/${grupo_id}`; 
       const response = await firstValueFrom(
         this.httpService.get<any>(url) // Se usa <any>
       );
@@ -136,7 +136,7 @@ export class GrupoEstudianteService {
   private async getMateriaDetails(materia_id: number): Promise<any | null> {
     try {
       // Asumo que esta es la URL del microservicio de materias
-      const url = `http://localhost:3000/api/materia/${materia_id}`; 
+      const url = `http://academia-service:3000/api/materia/${materia_id}`; 
       const response = await firstValueFrom(
         this.httpService.get<any>(url) // Se usa <any>
       );

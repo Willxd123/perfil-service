@@ -10,24 +10,16 @@ import { Repository } from 'typeorm';
 import { Estudiante } from './entities/estudiante.entity';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import * as bcrypt from 'bcryptjs';
-
-// Asumiendo que tienes estas entidades y DTOs en algún lugar
-// import { GrupoEstudiante } from '../grupo-estudiante/entities/grupo-estudiante.entity'; // O donde esté
-
 @Injectable()
 export class EstudianteService {
   constructor(
     @InjectRepository(Estudiante)
     private readonly estudianteRepository: Repository<Estudiante>,
     private readonly httpService: HttpService,
-    // Inject GrupoEstudianteRepository if needed for historial
-    // @InjectRepository(GrupoEstudiante)
-    // private readonly grupoEstudianteRepository: Repository<GrupoEstudiante>,
+
   ) {}
 
-  // --- Métodos CRUD básicos (findAll, findOne, create, update, remove) ---
-  // Estos métodos permanecen mayormente sin cambios.
-  // Asegúrate de que update use 'save' si quieres hooks o validaciones completas.
+
   findAll() {
     return this.estudianteRepository.find();
   }
@@ -110,13 +102,13 @@ export class EstudianteService {
   }
   
   private async obtenerInfoMaterias(estudianteId: number) {
-    const url = `http://localhost:3001/api/grupo/estudiante/${estudianteId}/materias-info`;
+    const url = `http://laravel.inscripciones/api/grupos/estudiante/${estudianteId}/materias-info`;
     const response = await firstValueFrom(this.httpService.get(url));
     return response.data;
   }
   
   private async obtenerMateriasConPrerequisitos() {
-    const url = 'http://localhost:3000/api/materia/con-prerequisitos';
+    const url = 'http://materias-service:3000/api/materia/con-prerequisitos';
     const response = await firstValueFrom(this.httpService.get(url));
     return response.data || [];
   }
@@ -126,7 +118,7 @@ export class EstudianteService {
   }
   private async validarPlanEstudio(plan_estudio_id: number): Promise<boolean> {
     try {
-      const url = `http://localhost:3003/api/plan-estudio/${plan_estudio_id}`;
+      const url = `http://academia-service:3003/api/plan-estudio/${plan_estudio_id}`;
       await firstValueFrom(this.httpService.get(url));
       return true;
     } catch (error) {
