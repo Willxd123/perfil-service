@@ -10,15 +10,21 @@ import { Repository } from 'typeorm';
 import { Estudiante } from './entities/estudiante.entity';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import * as bcrypt from 'bcryptjs';
+
 @Injectable()
 export class EstudianteService {
+  //llamdo a variable de entorno
+  //servicio grupos o inscripcion
+  private readonly api_inscripcion: string = process.env.API_INSCRIPCION!;
+  //servicio materias
+  private readonly api_materias: string = process.env.API_MATERIAS!;
+  //servicio academia
+  private readonly api_acedemia: string = process.env.API_ACADEMIA!;
   constructor(
     @InjectRepository(Estudiante)
     private readonly estudianteRepository: Repository<Estudiante>,
     private readonly httpService: HttpService,
-
   ) {}
-
 
   findAll() {
     return this.estudianteRepository.find();
@@ -41,9 +47,12 @@ export class EstudianteService {
     if (!planEstudioExiste) {
       throw new NotFoundException('Plan de estudio no encontrado');
     }
-     // Hash password on creation
-     if (createEstudianteDto.codigo) {
-      createEstudianteDto.codigo = await bcrypt.hash(createEstudianteDto.codigo, 10);
+    // Hash password on creation
+    if (createEstudianteDto.codigo) {
+      createEstudianteDto.codigo = await bcrypt.hash(
+        createEstudianteDto.codigo,
+        10,
+      );
     }
     const estudiante = this.estudianteRepository.create(createEstudianteDto);
     return this.estudianteRepository.save(estudiante);
@@ -77,57 +86,69 @@ export class EstudianteService {
     return this.estudianteRepository.remove(estudiante);
   }
 
-  // --- Métodos de Autenticación / Específicos ---
   findByRegistroWithPassword(registro: string) {
     // Asegúrate que la entidad Estudiante tenga la propiedad 'codigo' seleccionable
     return this.estudianteRepository.findOne({
       where: { registro },
-      select: ['id', 'nombre', 'email', 'registro', 'codigo', 'telefono', 'plan_estudio_id'],
+      select: [
+        'id',
+        'nombre',
+        'email',
+        'registro',
+        'codigo',
+        'telefono',
+        'plan_estudio_id',
+      ],
     });
   }
   async getMateriasDisponibles(estudianteId: number) {
     await this.findOne(estudianteId);
-    
+
     // 1 sola llamada a grupos-service (que internamente llama a grupo-estudiante)
-    const { materiasInscritas, materiasAprobadas } = await this.obtenerInfoMaterias(estudianteId);
-    
+    const { materiasInscritas, materiasAprobadas } =
+      await this.obtenerInfoMaterias(estudianteId);
+
     // 1 sola llamada a materias-service
     const todasLasMaterias = await this.obtenerMateriasConPrerequisitos();
-    
+
     // Filtrar localmente
-    return todasLasMaterias.filter(materia => 
-      !materiasInscritas.includes(materia.id) && 
-      this.cumplePrerequisitos(materia.prerequisitosIds || [], materiasAprobadas)
+    return todasLasMaterias.filter(
+      (materia) =>
+        !materiasInscritas.includes(materia.id) &&
+        this.cumplePrerequisitos(
+          materia.prerequisitosIds || [],
+          materiasAprobadas,
+        ),
     );
   }
-  
+
   private async obtenerInfoMaterias(estudianteId: number) {
-    const url = `http://laravel.inscripciones/api/grupos/estudiante/${estudianteId}/materias-info`;
+    const url = `${this.api_inscripcion}/grupos/estudiante/${estudianteId}/materias-info`;
     const response = await firstValueFrom(this.httpService.get(url));
     return response.data;
   }
-  
+
   private async obtenerMateriasConPrerequisitos() {
-    const url = 'http://materias-service:3000/api/materia/con-prerequisitos';
+    const url = `${this.api_materias}/materia/con-prerequisitos`;
     const response = await firstValueFrom(this.httpService.get(url));
     return response.data || [];
   }
-  
-  private cumplePrerequisitos(prerequisitosIds: number[], materiasAprobadas: number[]): boolean {
-    return prerequisitosIds.every(prereqId => materiasAprobadas.includes(prereqId));
+
+  private cumplePrerequisitos(
+    prerequisitosIds: number[],
+    materiasAprobadas: number[],
+  ): boolean {
+    return prerequisitosIds.every((prereqId) =>
+      materiasAprobadas.includes(prereqId),
+    );
   }
   private async validarPlanEstudio(plan_estudio_id: number): Promise<boolean> {
     try {
-      const url = `http://academia-service:3003/api/plan-estudio/${plan_estudio_id}`;
+      const url = `${this.api_acedemia}/api/plan-estudio/${plan_estudio_id}`;
       await firstValueFrom(this.httpService.get(url));
       return true;
     } catch (error) {
       return false;
     }
   }
-
-
-
-  
-
 }

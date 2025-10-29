@@ -9,6 +9,7 @@ import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class GrupoEstudianteService {
+
   constructor(
     @InjectRepository(GrupoEstudiante)
     private readonly grupoEstudianteRepository: Repository<GrupoEstudiante>,
@@ -22,8 +23,8 @@ export class GrupoEstudianteService {
   }
 
   async findOne(id: number) {
-    const grupoEstudiante = await this.grupoEstudianteRepository.findOne({ 
-      where: { id } 
+    const grupoEstudiante = await this.grupoEstudianteRepository.findOne({
+      where: { id },
     });
 
     if (!grupoEstudiante) {
@@ -39,12 +40,12 @@ export class GrupoEstudianteService {
     if (!grupoExiste) {
       throw new NotFoundException('Grupo no encontrado');
     }
-  
+
     // Si todo OK, crear la relación grupo-estudiante
     const grupoEstudiante = this.grupoEstudianteRepository.create(dto);
     return this.grupoEstudianteRepository.save(grupoEstudiante);
   }
-  
+
   async update(id: number, data: Partial<CreateGrupoEstudianteDto>) {
     // Validar que el grupo existe si se está actualizando el grupo_id
     if (data.grupo_id) {
@@ -53,13 +54,13 @@ export class GrupoEstudianteService {
         throw new NotFoundException('Grupo no encontrado');
       }
     }
-  
+
     // Buscar el grupo-estudiante existente
     const grupoEstudiante = await this.findOne(id);
-    
+
     // Actualizar los datos
     Object.assign(grupoEstudiante, data);
-    
+
     return this.grupoEstudianteRepository.save(grupoEstudiante);
   }
 
@@ -83,25 +84,29 @@ export class GrupoEstudianteService {
 
     // 2. Obtener TODAS las gestiones (para no consultar en bucle)
     const gestiones = await this.gestionRepository.find();
-    const gestionMap = new Map(gestiones.map(g => [g.id, g]));
+    const gestionMap = new Map(gestiones.map((g) => [g.id, g]));
 
     // 3. Enriquecer el historial
     const historialEnriquecido = await Promise.all(
       historial.map(async (item) => {
-        
         // 4. Obtener detalles del Grupo (para materiaId y gestionId)
         const grupo = await this.getGrupoDetails(item.grupo_id);
         if (!grupo) {
-          return { ...item, materiaNombre: 'Error', materiaSigla: 'Error', gestionNombre: 'Error' };
+          return {
+            ...item,
+            materiaNombre: 'Error',
+            materiaSigla: 'Error',
+            gestionNombre: 'Error',
+          };
         }
 
         // 5. Obtener detalles de la Materia (con el materiaId del grupo)
-        const materia = await this.getMateriaDetails(grupo.materiaId);
+        const materia = await this.getMateriaDetails(grupo.materia_id);
 
         // 6. Obtener la gestión desde el mapa
-        const gestion = gestionMap.get(grupo.gestionId);
-        const gestionNombre = gestion 
-          ? `${gestion.periodo}-${gestion.ano}` 
+        const gestion = gestionMap.get(grupo.gestion_id);
+        const gestionNombre = gestion
+          ? `${gestion.periodo}-${gestion.ano}`
           : 'N/A';
 
         // 7. Combinar y devolver
@@ -111,7 +116,7 @@ export class GrupoEstudianteService {
           materiaSigla: materia ? materia.sigla : 'N/A',
           gestionNombre: gestionNombre,
         };
-      })
+      }),
     );
 
     return historialEnriquecido;
@@ -121,10 +126,10 @@ export class GrupoEstudianteService {
 
   private async getGrupoDetails(grupo_id: number): Promise<any | null> {
     try {
-      // Corregido: localhost, no loc
-      const url = `http://laravel.inscripciones/api/grupos/${grupo_id}`; 
+      const api_inscripcion = process.env.API_INSCRIPCION!;
+      const url = `${api_inscripcion}/grupos/${grupo_id}`;
       const response = await firstValueFrom(
-        this.httpService.get<any>(url) // Se usa <any>
+        this.httpService.get<any>(url), // Se usa <any>
       );
       return response.data; // Devuelve el objeto del grupo
     } catch (error) {
@@ -135,10 +140,10 @@ export class GrupoEstudianteService {
 
   private async getMateriaDetails(materia_id: number): Promise<any | null> {
     try {
-      // Asumo que esta es la URL del microservicio de materias
-      const url = `http://academia-service:3000/api/materia/${materia_id}`; 
+      const api_materia = process.env.API_MATERIAS!;
+      const url = `${api_materia}/materia/${materia_id}`;
       const response = await firstValueFrom(
-        this.httpService.get<any>(url) // Se usa <any>
+        this.httpService.get<any>(url), // Se usa <any>
       );
       return response.data; // Devuelve el objeto de materia
     } catch (error) {

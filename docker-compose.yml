@@ -15,6 +15,9 @@ services:
       - DATABASE_SSL=${DATABASE_SSL}
       - JWT_SECRET=${JWT_SECRET}
       - PORT=3002
+      - API_INSCRIPCION=http://laravel.inscripciones/api 
+      - API_MATERIAS=http://materias-service:3000/api
+      - API_ACADEMIA=http://acedemia-service:3003/api
     restart: unless-stopped
     networks:
       - microservicios-topicos
